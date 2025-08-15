@@ -156,7 +156,7 @@ resource "aws_secretsmanager_secret_version" "db_credentials" {
 resource "aws_cloudwatch_log_group" "postgresql" {
   name              = "/aws/rds/instance/${aws_db_instance.main.identifier}/postgresql"
   retention_in_days = 7
-  kms_key_id        = var.kms_key_id
+  kms_key_id        = var.cloudwatch_kms_key_id != "" ? var.cloudwatch_kms_key_id : null
 
   tags = var.tags
 }

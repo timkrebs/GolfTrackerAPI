@@ -24,8 +24,14 @@ variable "security_group_id" {
 }
 
 variable "kms_key_id" {
-  description = "KMS key ID for RDS encryption"
+  description = "KMS key ARN for RDS encryption"
   type        = string
+}
+
+variable "cloudwatch_kms_key_id" {
+  description = "KMS key ARN for CloudWatch logs encryption"
+  type        = string
+  default     = ""
 }
 
 variable "engine_version" {

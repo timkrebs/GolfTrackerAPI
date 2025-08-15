@@ -160,7 +160,7 @@ module "s3" {
   project_name = var.project_name
   environment  = var.environment
 
-  kms_key_id = module.kms.s3_kms_key_id
+  kms_key_id = module.kms.s3_kms_key_arn
 
   # Video storage configuration
   video_bucket_lifecycle_rules = var.s3_lifecycle_rules
@@ -175,10 +175,11 @@ module "rds" {
   project_name = var.project_name
   environment  = var.environment
 
-  vpc_id              = module.vpc.vpc_id
-  database_subnet_ids = module.vpc.database_subnet_ids
-  security_group_id   = module.security_groups.rds_security_group_id
-  kms_key_id          = module.kms.rds_kms_key_id
+  vpc_id                = module.vpc.vpc_id
+  database_subnet_ids   = module.vpc.database_subnet_ids
+  security_group_id     = module.security_groups.rds_security_group_id
+  kms_key_id            = module.kms.rds_kms_key_arn
+  cloudwatch_kms_key_id = module.kms.cloudwatch_logs_kms_key_arn
 
   # Database configuration
   engine_version    = var.rds_engine_version
