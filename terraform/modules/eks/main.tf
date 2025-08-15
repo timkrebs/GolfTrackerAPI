@@ -183,10 +183,10 @@ resource "aws_launch_template" "node_group" {
   vpc_security_group_ids = [var.node_security_group_id]
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-    cluster_name      = var.cluster_name
-    endpoint          = aws_eks_cluster.main.endpoint
-    certificate       = aws_eks_cluster.main.certificate_authority[0].data
-    node_group_name   = each.key
+    cluster_name    = var.cluster_name
+    endpoint        = aws_eks_cluster.main.endpoint
+    certificate     = aws_eks_cluster.main.certificate_authority[0].data
+    node_group_name = each.key
   }))
 
   block_device_mappings {
@@ -224,11 +224,12 @@ resource "aws_launch_template" "node_group" {
 resource "aws_eks_addon" "main" {
   for_each = var.cluster_addons
 
-  cluster_name             = aws_eks_cluster.main.name
-  addon_name               = each.key
-  addon_version            = each.value.version
-  resolve_conflicts        = "OVERWRITE"
-  
+  cluster_name                = aws_eks_cluster.main.name
+  addon_name                  = each.key
+  addon_version               = each.value.version
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "PRESERVE"
+
   depends_on = [
     aws_eks_node_group.main
   ]

@@ -52,12 +52,12 @@ output "node_groups" {
   description = "EKS node groups"
   value = {
     for k, v in aws_eks_node_group.main : k => {
-      arn           = v.arn
-      status        = v.status
-      capacity_type = v.capacity_type
+      arn            = v.arn
+      status         = v.status
+      capacity_type  = v.capacity_type
       instance_types = v.instance_types
       scaling_config = v.scaling_config
-      labels        = v.labels
+      labels         = v.labels
     }
   }
 }
@@ -76,9 +76,9 @@ output "cluster_addons" {
   description = "Map of attribute maps for all EKS cluster addons enabled"
   value = {
     for k, v in aws_eks_addon.main : k => {
-      arn               = v.arn
-      status            = v.status
-      addon_version     = v.addon_version
+      arn                      = v.arn
+      status                   = v.status
+      addon_version            = v.addon_version
       service_account_role_arn = v.service_account_role_arn
     }
   }
