@@ -3,19 +3,9 @@ resource "aws_security_group" "eks_cluster" {
   name_prefix = "${var.project_name}-${var.environment}-eks-cluster"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description = "HTTPS"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  # Managed externally by aws_security_group_rule resources
+  lifecycle {
+    create_before_destroy = true
   }
 
   tags = merge(var.tags, {
@@ -23,53 +13,101 @@ resource "aws_security_group" "eks_cluster" {
   })
 }
 
+# EKS Cluster Security Group Rules - managed separately for better control
+resource "aws_security_group_rule" "eks_cluster_ingress_https" {
+  type              = "ingress"
+  description       = "HTTPS access to EKS cluster"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = [var.vpc_cidr]
+  security_group_id = aws_security_group.eks_cluster.id
+}
+
+resource "aws_security_group_rule" "eks_cluster_ingress_nodes" {
+  type                     = "ingress"
+  description              = "Allow nodes to communicate with cluster API"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.eks_nodes.id
+  security_group_id        = aws_security_group.eks_cluster.id
+}
+
+resource "aws_security_group_rule" "eks_cluster_egress_all" {
+  type              = "egress"
+  description       = "All outbound traffic"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.eks_cluster.id
+}
+
 # Security Group for EKS Worker Nodes
 resource "aws_security_group" "eks_nodes" {
   name_prefix = "${var.project_name}-${var.environment}-eks-nodes"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description = "Node to node communication"
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    self        = true
-  }
-
-  ingress {
-    description     = "Pod to pod communication"
-    from_port       = 1025
-    to_port         = 65535
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_cluster.id]
-  }
-
-  ingress {
-    description     = "Kubectl to nodes"
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_cluster.id]
-  }
-
-  ingress {
-    description = "NodePort Services"
-    from_port   = 30000
-    to_port     = 32767
-    protocol    = "tcp"
-    cidr_blocks = [var.vpc_cidr]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  # Managed externally by aws_security_group_rule resources
+  lifecycle {
+    create_before_destroy = true
   }
 
   tags = merge(var.tags, {
     Name = "${var.project_name}-${var.environment}-eks-nodes-sg"
   })
+}
+
+# EKS Nodes Security Group Rules - managed separately for better control
+resource "aws_security_group_rule" "eks_nodes_ingress_self" {
+  type              = "ingress"
+  description       = "Node to node communication"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "tcp"
+  self              = true
+  security_group_id = aws_security_group.eks_nodes.id
+}
+
+resource "aws_security_group_rule" "eks_nodes_ingress_cluster" {
+  type                     = "ingress"
+  description              = "Pod to pod communication from cluster"
+  from_port                = 1025
+  to_port                  = 65535
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.eks_cluster.id
+  security_group_id        = aws_security_group.eks_nodes.id
+}
+
+resource "aws_security_group_rule" "eks_nodes_ingress_cluster_443" {
+  type                     = "ingress"
+  description              = "Kubectl to nodes"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.eks_cluster.id
+  security_group_id        = aws_security_group.eks_nodes.id
+}
+
+resource "aws_security_group_rule" "eks_nodes_ingress_nodeport" {
+  type              = "ingress"
+  description       = "NodePort Services"
+  from_port         = 30000
+  to_port           = 32767
+  protocol          = "tcp"
+  cidr_blocks       = [var.vpc_cidr]
+  security_group_id = aws_security_group.eks_nodes.id
+}
+
+resource "aws_security_group_rule" "eks_nodes_egress_all" {
+  type              = "egress"
+  description       = "All outbound traffic"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.eks_nodes.id
 }
 
 # Security Group for Application Load Balancer
