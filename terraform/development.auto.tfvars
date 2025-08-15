@@ -1,4 +1,4 @@
-# Production Environment Configuration for GolfTracker Analytics
+# Development Environment Configuration for GolfTracker Analytics
 
 # Environment Settings
 environment = "production"
