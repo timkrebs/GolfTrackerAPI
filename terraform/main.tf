@@ -13,17 +13,13 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    kubernetes = {
-      source  = "hashicorp/kubernetes"
-      version = "~> 2.23"
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.4"
     }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.11"
-    }
-    vault = {
-      source  = "hashicorp/vault"
-      version = "~> 3.21"
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
     }
   }
 }
@@ -41,29 +37,10 @@ provider "aws" {
   }
 }
 
-provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-  exec {
-    api_version = "client.authentication.k8s.io/v1beta1"
-    command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
-  }
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
-    }
-  }
-}
+# Note: Kubernetes and Helm providers are not configured here to avoid
+# dependency issues during initial deployment. The Vault Secrets Operator
+# will be installed using kubectl commands in a null_resource after the
+# EKS cluster is created and accessible.
 
 # Data sources
 data "aws_availability_zones" "available" {
