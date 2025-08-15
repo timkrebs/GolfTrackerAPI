@@ -96,10 +96,10 @@ output "database_route_table_ids" {
 output "vpc_endpoints" {
   description = "VPC endpoint information"
   value = {
-    s3       = aws_vpc_endpoint.s3.id
-    ec2      = aws_vpc_endpoint.ec2.id
-    ecr_dkr  = aws_vpc_endpoint.ecr_dkr.id
-    ecr_api  = aws_vpc_endpoint.ecr_api.id
+    s3      = aws_vpc_endpoint.s3.id
+    ec2     = aws_vpc_endpoint.ec2.id
+    ecr_dkr = aws_vpc_endpoint.ecr_dkr.id
+    ecr_api = aws_vpc_endpoint.ecr_api.id
   }
 }
 
