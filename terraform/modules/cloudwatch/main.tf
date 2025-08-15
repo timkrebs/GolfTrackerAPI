@@ -61,9 +61,9 @@ resource "aws_cloudwatch_dashboard" "main" {
 
         properties = {
           metrics = [
-            ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "${var.project_name}-${var.environment}-db"],
-            ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", "${var.project_name}-${var.environment}-db"],
-            ["AWS/RDS", "FreeableMemory", "DBInstanceIdentifier", "${var.project_name}-${var.environment}-db"]
+            ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "*"],
+            ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", "*"],
+            ["AWS/RDS", "FreeableMemory", "DBInstanceIdentifier", "*"]
           ]
           view    = "timeSeries"
           stacked = false
@@ -109,7 +109,7 @@ resource "aws_cloudwatch_metric_alarm" "high_cpu" {
   alarm_actions       = [aws_sns_topic.alerts.arn]
 
   dimensions = {
-    DBInstanceIdentifier = "${var.project_name}-${var.environment}-db"
+    DBInstanceIdentifier = var.rds_instance_identifier
   }
 
   tags = var.tags
@@ -128,7 +128,7 @@ resource "aws_cloudwatch_metric_alarm" "high_connections" {
   alarm_actions       = [aws_sns_topic.alerts.arn]
 
   dimensions = {
-    DBInstanceIdentifier = "${var.project_name}-${var.environment}-db"
+    DBInstanceIdentifier = var.rds_instance_identifier
   }
 
   tags = var.tags
@@ -147,7 +147,7 @@ resource "aws_cloudwatch_metric_alarm" "low_free_memory" {
   alarm_actions       = [aws_sns_topic.alerts.arn]
 
   dimensions = {
-    DBInstanceIdentifier = "${var.project_name}-${var.environment}-db"
+    DBInstanceIdentifier = var.rds_instance_identifier
   }
 
   tags = var.tags
@@ -163,8 +163,8 @@ resource "aws_budgets_budget" "monthly" {
   time_period_start = "2024-01-01_00:00"
 
   cost_filter {
-    name   = "TagKey"
-    values = ["Project"]
+    name   = "Service"
+    values = ["Amazon Elastic Compute Cloud - Compute", "Amazon Relational Database Service", "Amazon Simple Storage Service"]
   }
 
   notification {

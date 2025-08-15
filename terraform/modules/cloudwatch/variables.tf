@@ -24,6 +24,12 @@ variable "monthly_budget_limit" {
   default     = "500"
 }
 
+variable "rds_instance_identifier" {
+  description = "RDS instance identifier for monitoring"
+  type        = string
+  default     = ""
+}
+
 variable "tags" {
   description = "A map of tags to assign to the resource"
   type        = map(string)

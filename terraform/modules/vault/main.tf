@@ -45,7 +45,7 @@ resource "aws_iam_policy" "vault_kms" {
           "kms:GenerateDataKey*",
           "kms:ReEncrypt*"
         ]
-        Resource = var.kms_key_id
+        Resource = "arn:aws:kms:*:*:key/${var.kms_key_id}"
       },
       {
         Effect = "Allow"

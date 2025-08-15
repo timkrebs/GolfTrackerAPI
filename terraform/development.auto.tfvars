@@ -46,16 +46,16 @@ s3_lifecycle_rules = [
     status = "Enabled"
     transitions = [
       {
-        days          = 7
+        days          = 30
         storage_class = "STANDARD_IA"
       },
       {
-        days          = 30
+        days          = 60
         storage_class = "GLACIER"
       }
     ]
     expiration = {
-      days = 90 # Short retention for development
+      days = 180 # Short retention for development
     }
   }
 ]

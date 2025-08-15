@@ -199,26 +199,8 @@ resource "aws_security_group" "redis" {
   })
 }
 
-# Security Group Rules for EKS Cluster communication with nodes
-resource "aws_security_group_rule" "cluster_ingress_workstation_https" {
-  description       = "Allow workstation to communicate with the cluster API Server"
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = [var.vpc_cidr]
-  security_group_id = aws_security_group.eks_cluster.id
-}
-
-resource "aws_security_group_rule" "cluster_ingress_node_https" {
-  description              = "Allow pods to communicate with the cluster API Server"
-  type                     = "ingress"
-  from_port                = 443
-  to_port                  = 443
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.eks_nodes.id
-  security_group_id        = aws_security_group.eks_cluster.id
-}
+# Note: Removed duplicate security group rules that were conflicting with
+# the inline rules defined in the aws_security_group.eks_cluster resource
 
 # WAF for Application Load Balancer
 resource "aws_wafv2_web_acl" "main" {

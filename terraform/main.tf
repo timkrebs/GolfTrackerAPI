@@ -119,7 +119,7 @@ module "eks" {
   cluster_security_group_id = module.security_groups.eks_cluster_security_group_id
   node_security_group_id    = module.security_groups.eks_node_security_group_id
 
-  kms_key_id = module.kms.eks_kms_key_id
+  kms_key_id = module.kms.eks_kms_key_arn
 
   # Node Groups
   node_groups = var.eks_node_groups
@@ -143,7 +143,7 @@ module "vault" {
   vpc_id            = module.vpc.vpc_id
   subnet_id         = module.vpc.public_subnet_ids[0]
   security_group_id = module.security_groups.vault_security_group_id
-  kms_key_id        = module.kms.vault_kms_key_id
+  kms_key_id        = module.kms.vault_kms_key_arn
 
   instance_type = var.vault_instance_type
 
@@ -209,6 +209,9 @@ module "cloudwatch" {
 
   # EKS cluster name for log groups
   cluster_name = module.eks.cluster_name
+
+  # RDS instance identifier for monitoring
+  rds_instance_identifier = module.rds.db_instance_id
 
   # SNS topic for alerts
   alert_email = var.alert_email

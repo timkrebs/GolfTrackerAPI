@@ -5,7 +5,7 @@ resource "local_file" "install_vso_script" {
     vault_url  = var.vault_url
     vault_role = var.vault_role
   })
-  
+
   file_permission = "0755"
 }
 

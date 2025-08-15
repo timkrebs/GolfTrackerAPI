@@ -4,9 +4,14 @@ resource "random_password" "master" {
   special = true
 }
 
+# Random suffix to avoid conflicts
+resource "random_id" "db_subnet_group_suffix" {
+  byte_length = 4
+}
+
 # RDS Subnet Group
 resource "aws_db_subnet_group" "main" {
-  name       = "${var.project_name}-${var.environment}-db-subnet-group"
+  name       = "${var.project_name}-${var.environment}-db-subnet-group-${random_id.db_subnet_group_suffix.hex}"
   subnet_ids = var.database_subnet_ids
 
   tags = merge(var.tags, {
@@ -17,7 +22,7 @@ resource "aws_db_subnet_group" "main" {
 # RDS Parameter Group
 resource "aws_db_parameter_group" "main" {
   family = "postgres15"
-  name   = "${var.project_name}-${var.environment}-db-params"
+  name   = "${var.project_name}-${var.environment}-db-params-${random_id.db_subnet_group_suffix.hex}"
 
   parameter {
     name  = "log_statement"
@@ -39,7 +44,7 @@ resource "aws_db_parameter_group" "main" {
 
 # RDS Instance
 resource "aws_db_instance" "main" {
-  identifier = "${var.project_name}-${var.environment}-db"
+  identifier = "${var.project_name}-${var.environment}-db-${random_id.db_subnet_group_suffix.hex}"
 
   # Engine configuration
   engine         = "postgres"

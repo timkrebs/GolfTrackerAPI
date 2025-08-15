@@ -20,7 +20,7 @@ output "installation_script" {
 
 output "vault_connection_manifest" {
   description = "Example VaultConnection manifest for manual application"
-  value = <<-EOF
+  value       = <<-EOF
     apiVersion: secrets.hashicorp.com/v1beta1
     kind: VaultConnection
     metadata:
@@ -34,7 +34,7 @@ output "vault_connection_manifest" {
 
 output "vault_auth_manifest" {
   description = "Example VaultAuth manifest for manual application"
-  value = <<-EOF
+  value       = <<-EOF
     apiVersion: secrets.hashicorp.com/v1beta1
     kind: VaultAuth
     metadata:
