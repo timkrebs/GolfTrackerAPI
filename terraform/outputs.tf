@@ -197,8 +197,8 @@ output "connection_info" {
       region   = var.aws_region
     }
     vault = {
-      url        = "https://${module.vault.public_ip}:8200"
-      private_ip = module.vault.private_ip
+      url         = "https://${module.vault.public_ip}:8200"
+      private_ip  = module.vault.private_ip
       instance_id = module.vault.instance_id
     }
     rds = {

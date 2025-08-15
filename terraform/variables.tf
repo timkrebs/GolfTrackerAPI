@@ -14,7 +14,7 @@ variable "environment" {
   description = "Environment name (development, staging, production)"
   type        = string
   default     = "production"
-  
+
   validation {
     condition     = contains(["development", "staging", "production"], var.environment)
     error_message = "Environment must be development, staging, or production."
@@ -70,12 +70,12 @@ variable "eks_node_groups" {
   type = map(object({
     instance_types = list(string)
     capacity_type  = string
-    min_size      = number
-    max_size      = number
-    desired_size  = number
-    disk_size     = number
-    labels        = map(string)
-    taints        = list(object({
+    min_size       = number
+    max_size       = number
+    desired_size   = number
+    disk_size      = number
+    labels         = map(string)
+    taints = list(object({
       key    = string
       value  = string
       effect = string
@@ -85,10 +85,10 @@ variable "eks_node_groups" {
     general = {
       instance_types = ["t3.medium", "t3.large"]
       capacity_type  = "ON_DEMAND"
-      min_size      = 1
-      max_size      = 10
-      desired_size  = 2
-      disk_size     = 50
+      min_size       = 1
+      max_size       = 10
+      desired_size   = 2
+      disk_size      = 50
       labels = {
         role = "general"
       }
@@ -97,10 +97,10 @@ variable "eks_node_groups" {
     spot = {
       instance_types = ["t3.medium", "t3.large", "t3.xlarge"]
       capacity_type  = "SPOT"
-      min_size      = 0
-      max_size      = 10
-      desired_size  = 0
-      disk_size     = 50
+      min_size       = 0
+      max_size       = 10
+      desired_size   = 0
+      disk_size      = 50
       labels = {
         role = "spot"
       }
@@ -200,8 +200,8 @@ variable "rds_maintenance_window" {
 variable "s3_lifecycle_rules" {
   description = "S3 lifecycle rules for video storage"
   type = list(object({
-    id      = string
-    status  = string
+    id     = string
+    status = string
     transitions = list(object({
       days          = number
       storage_class = string
@@ -229,7 +229,7 @@ variable "s3_lifecycle_rules" {
         }
       ]
       expiration = {
-        days = 2555  # 7 years
+        days = 2555 # 7 years
       }
     }
   ]
