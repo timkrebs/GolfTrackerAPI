@@ -37,6 +37,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "video_storage" {
       id     = rule.value.id
       status = rule.value.status
 
+      filter {
+        prefix = ""
+      }
+
       dynamic "transition" {
         for_each = rule.value.transitions
         content {

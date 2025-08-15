@@ -130,6 +130,8 @@ module "kms" {
 module "eks" {
   source = "./modules/eks"
 
+  project_name    = var.project_name
+  environment     = var.environment
   cluster_name    = local.cluster_name
   cluster_version = var.eks_cluster_version
 
