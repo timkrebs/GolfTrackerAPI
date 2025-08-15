@@ -77,7 +77,6 @@ output "cluster_addons" {
   value = {
     for k, v in aws_eks_addon.main : k => {
       arn                      = v.arn
-      status                   = v.status
       addon_version            = v.addon_version
       service_account_role_arn = v.service_account_role_arn
     }

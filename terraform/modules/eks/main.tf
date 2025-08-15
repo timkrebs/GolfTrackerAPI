@@ -252,7 +252,7 @@ resource "aws_iam_openid_connect_provider" "cluster" {
 
 # IAM Role for AWS Load Balancer Controller
 resource "aws_iam_role" "aws_load_balancer_controller" {
-  name = "${var.cluster_name}-aws-load-balancer-controller"
+  name = "${var.project_name}-${var.environment}-alb-controller"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -277,7 +277,7 @@ resource "aws_iam_role" "aws_load_balancer_controller" {
 }
 
 resource "aws_iam_policy" "aws_load_balancer_controller" {
-  name = "${var.cluster_name}-aws-load-balancer-controller"
+  name = "${var.project_name}-${var.environment}-alb-controller-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -444,7 +444,7 @@ resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
 
 # IAM Role for Cluster Autoscaler
 resource "aws_iam_role" "cluster_autoscaler" {
-  name = "${var.cluster_name}-cluster-autoscaler"
+  name = "${var.project_name}-${var.environment}-cluster-autoscaler"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -469,7 +469,7 @@ resource "aws_iam_role" "cluster_autoscaler" {
 }
 
 resource "aws_iam_policy" "cluster_autoscaler" {
-  name = "${var.cluster_name}-cluster-autoscaler"
+  name = "${var.project_name}-${var.environment}-autoscaler-policy"
 
   policy = jsonencode({
     Version = "2012-10-17"
