@@ -16,8 +16,8 @@ variable "kms_key_id" {
 variable "video_bucket_lifecycle_rules" {
   description = "Lifecycle rules for video storage bucket"
   type = list(object({
-    id      = string
-    status  = string
+    id     = string
+    status = string
     transitions = list(object({
       days          = number
       storage_class = string

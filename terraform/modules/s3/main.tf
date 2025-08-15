@@ -3,12 +3,12 @@ resource "aws_s3_bucket" "video_storage" {
   bucket = "${var.project_name}-${var.environment}-video-storage"
 
   tags = merge(var.tags, {
-    Name = "${var.project_name}-${var.environment}-video-storage"
+    Name    = "${var.project_name}-${var.environment}-video-storage"
     Purpose = "Video file storage for AI processing"
   })
 }
 
-resource "aws_s3_bucket_encryption_configuration" "video_storage" {
+resource "aws_s3_bucket_server_side_encryption_configuration" "video_storage" {
   bucket = aws_s3_bucket.video_storage.id
 
   rule {
@@ -57,12 +57,12 @@ resource "aws_s3_bucket" "backup" {
   bucket = "${var.project_name}-${var.environment}-backup"
 
   tags = merge(var.tags, {
-    Name = "${var.project_name}-${var.environment}-backup"
+    Name    = "${var.project_name}-${var.environment}-backup"
     Purpose = "Backup storage for Vault and application data"
   })
 }
 
-resource "aws_s3_bucket_encryption_configuration" "backup" {
+resource "aws_s3_bucket_server_side_encryption_configuration" "backup" {
   bucket = aws_s3_bucket.backup.id
 
   rule {
