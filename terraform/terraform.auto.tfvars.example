@@ -1,0 +1,30 @@
+# AWS Configuration
+aws_region = "eu-central-1"
+environment = "dev"
+
+# Project Configuration
+project_name = "golf-tracker"
+
+# Container Configuration
+container_image = "your-account-id.dkr.ecr.eu-central-1.amazonaws.com/golf-tracker:latest"
+container_port = 8000
+
+# ECS Configuration
+desired_capacity = 2
+min_capacity = 1
+max_capacity = 10
+cpu = 256
+memory = 512
+
+# Supabase Configuration (Diese sollten als Environment Variables in HCP Terraform gesetzt werden)
+supabase_url = "your-supabase-url"
+supabase_key = "your-supabase-anon-key"
+database_url = "postgresql://user:password@host:port/database"
+
+# Optional: Domain und SSL
+domain_name = ""
+certificate_arn = ""
+
+# Monitoring
+enable_container_insights = true
+log_retention_days = 30
