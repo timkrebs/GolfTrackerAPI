@@ -24,6 +24,12 @@ variable "project_name" {
 variable "container_image" {
   description = "Docker Container Image URI"
   type        = string
+  default     = ""  # Will be set by CI/CD or HCP Terraform variables
+  
+  validation {
+    condition     = length(var.container_image) > 0
+    error_message = "Container image URI ist erforderlich. Setzen Sie diese Variable in HCP Terraform oder via -var."
+  }
 }
 
 variable "container_port" {
@@ -66,18 +72,21 @@ variable "supabase_url" {
   description = "Supabase URL"
   type        = string
   sensitive   = true
+  default     = ""  # Set this in HCP Terraform variables
 }
 
 variable "supabase_key" {
   description = "Supabase API Key"
   type        = string
   sensitive   = true
+  default     = ""  # Set this in HCP Terraform variables
 }
 
 variable "database_url" {
   description = "Database URL"
   type        = string
   sensitive   = true
+  default     = ""  # Set this in HCP Terraform variables
 }
 
 variable "domain_name" {

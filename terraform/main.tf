@@ -10,10 +10,10 @@ terraform {
 
   # HCP Terraform Backend Configuration
   cloud {
-    organization = "your-organization-name"  # Ersetzen Sie dies durch Ihre HCP Terraform Organisation
+    organization = "your-organization-name"  # TODO: Ersetzen Sie dies durch Ihre HCP Terraform Organisation
     
     workspaces {
-      name = "golf-tracker-analytics"
+      name = "golf-tracker-analytics"  # TODO: Ggf. anpassen wenn Ihr Workspace anders heißt
     }
   }
 }
