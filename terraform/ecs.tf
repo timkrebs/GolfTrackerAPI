@@ -32,7 +32,7 @@ resource "aws_ecs_task_definition" "app" {
     {
       name  = "${local.name_prefix}-app"
       image = var.container_image
-      
+
       portMappings = [
         {
           containerPort = var.container_port
@@ -81,10 +81,10 @@ resource "aws_ecs_task_definition" "app" {
       }
 
       healthCheck = {
-        command = ["CMD-SHELL", "curl -f http://localhost:${var.container_port}/health || exit 1"]
-        interval = 30
-        timeout = 5
-        retries = 3
+        command     = ["CMD-SHELL", "curl -f http://localhost:${var.container_port}/health || exit 1"]
+        interval    = 30
+        timeout     = 5
+        retries     = 3
         startPeriod = 60
       }
 
@@ -97,16 +97,16 @@ resource "aws_ecs_task_definition" "app" {
 
 # ECS Service
 resource "aws_ecs_service" "app" {
-  name            = "${local.name_prefix}-service"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.app.arn
-  desired_count   = var.desired_capacity
-  launch_type     = "FARGATE"
+  name             = "${local.name_prefix}-service"
+  cluster          = aws_ecs_cluster.main.id
+  task_definition  = aws_ecs_task_definition.app.arn
+  desired_count    = var.desired_capacity
+  launch_type      = "FARGATE"
   platform_version = "LATEST"
 
   network_configuration {
     security_groups  = [aws_security_group.ecs_tasks.id]
-    subnets         = aws_subnet.private[*].id
+    subnets          = aws_subnet.private[*].id
     assign_public_ip = false
   }
 
@@ -119,7 +119,7 @@ resource "aws_ecs_service" "app" {
   deployment_configuration {
     maximum_percent         = 200
     minimum_healthy_percent = 100
-    
+
     deployment_circuit_breaker {
       enable   = true
       rollback = true

@@ -6,7 +6,7 @@ resource "aws_secretsmanager_secret" "supabase_credentials" {
   name                    = "${local.name_prefix}/supabase"
   description             = "Supabase credentials for Golf Tracker API"
   recovery_window_in_days = 7
-  
+
   tags = local.common_tags
 }
 
@@ -17,7 +17,7 @@ resource "aws_secretsmanager_secret_version" "supabase_credentials" {
     supabase_key = var.supabase_key
     database_url = var.database_url
   })
-  
+
   lifecycle {
     ignore_changes = [secret_string]
   }
@@ -28,7 +28,7 @@ resource "aws_secretsmanager_secret" "database_credentials" {
   name                    = "${local.name_prefix}/database"
   description             = "Database credentials for Golf Tracker API"
   recovery_window_in_days = 7
-  
+
   tags = local.common_tags
 }
 
@@ -36,10 +36,10 @@ resource "aws_secretsmanager_secret_version" "database_credentials" {
   secret_id = aws_secretsmanager_secret.database_credentials.id
   secret_string = jsonencode({
     database_url = var.database_url
-    db_host     = split("@", split("://", var.database_url)[1])[1]
-    db_name     = split("/", var.database_url)[length(split("/", var.database_url)) - 1]
+    db_host      = split("@", split("://", var.database_url)[1])[1]
+    db_name      = split("/", var.database_url)[length(split("/", var.database_url)) - 1]
   })
-  
+
   lifecycle {
     ignore_changes = [secret_string]
   }

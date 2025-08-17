@@ -93,20 +93,10 @@ resource "aws_lb_listener" "app" {
   load_balancer_arn = aws_lb.app.arn
   port              = var.certificate_arn != "" ? "443" : "80"
   protocol          = var.certificate_arn != "" ? "HTTPS" : "HTTP"
-  
-  dynamic "ssl_policy" {
-    for_each = var.certificate_arn != "" ? [1] : []
-    content {
-      ssl_policy = "ELBSecurityPolicy-TLS-1-2-2017-01"
-    }
-  }
-  
-  dynamic "certificate_arn" {
-    for_each = var.certificate_arn != "" ? [1] : []
-    content {
-      certificate_arn = var.certificate_arn
-    }
-  }
+
+  # SSL Policy only for HTTPS
+  ssl_policy      = var.certificate_arn != "" ? "ELBSecurityPolicy-TLS-1-2-2017-01" : null
+  certificate_arn = var.certificate_arn != "" ? var.certificate_arn : null
 
   default_action {
     type             = "forward"
@@ -154,7 +144,7 @@ resource "aws_s3_bucket_policy" "alb_logs" {
       {
         Effect = "Allow"
         Principal = {
-          AWS = "arn:aws:iam::054676820928:root"  # EU Central 1 ELB Account ID
+          AWS = "arn:aws:iam::054676820928:root" # EU Central 1 ELB Account ID
         }
         Action   = "s3:PutObject"
         Resource = "${aws_s3_bucket.alb_logs.arn}/alb/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
@@ -191,6 +181,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "alb_logs" {
   rule {
     id     = "delete_old_logs"
     status = "Enabled"
+
+    # Filter is required when using expiration rules
+    filter {
+      prefix = ""
+    }
 
     expiration {
       days = 30
