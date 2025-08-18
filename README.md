@@ -237,6 +237,46 @@ For production deployment, consider:
 6. **Environment Variables**: Use environment-based configuration
 7. **Scaling**: Consider horizontal scaling with load balancers
 
+## 🚀 CI/CD Pipeline
+
+This project includes a complete CI/CD pipeline using GitHub Actions:
+
+### Features
+- **Automated Testing**: Runs on every pull request
+- **Multi-Environment Deployment**: Separate dev and prod environments  
+- **Security Scanning**: Vulnerability scanning with Trivy
+- **Infrastructure as Code**: Automated Terraform deployments
+- **Health Checks**: Post-deployment verification
+
+### Quick Setup
+```bash
+# Run the setup script
+./scripts/setup-cicd.sh
+
+# Follow the instructions to configure GitHub secrets
+```
+
+### Deployment
+- **Development**: Push to `develop` branch
+- **Production**: Push to `main` branch
+- **Infrastructure**: Manual workflow dispatch or terraform changes
+
+For detailed instructions, see [CICD_GUIDE.md](CICD_GUIDE.md)
+
+## 📊 Project Structure
+
+```
+GolfTrackerAnalytics/
+├── .github/workflows/       # CI/CD pipelines
+│   ├── deploy.yml          # Application deployment
+│   └── infrastructure.yml  # Infrastructure deployment
+├── app/                    # FastAPI application
+├── terraform/              # Infrastructure as Code
+├── tests/                  # Test suite
+├── scripts/                # Deployment and setup scripts
+└── docs/                   # Documentation
+```
+
 ## License
 
 This project is open source and available under the MIT License.

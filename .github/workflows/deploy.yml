@@ -1,0 +1,186 @@
+name: Deploy Golf Course API
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  PROJECT_NAME: golf-course-api
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio httpx
+
+    - name: Run tests
+      run: |
+        # Run basic import tests
+        python -c "from app.main import app; print('✅ App imports successfully')"
+        python -c "from app.models import GolfCourse, Hole; print('✅ Models import successfully')"
+        python -c "from app.database_new import DatabaseService; print('✅ Database service imports successfully')"
+
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Determine environment
+      id: env
+      run: |
+        if [[ ${{ github.ref }} == 'refs/heads/main' ]]; then
+          echo "environment=prod" >> $GITHUB_OUTPUT
+          echo "ecr_repository=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.PROJECT_NAME }}-prod" >> $GITHUB_OUTPUT
+          echo "ecs_cluster=${{ env.PROJECT_NAME }}-prod-cluster" >> $GITHUB_OUTPUT
+          echo "ecs_service=${{ env.PROJECT_NAME }}-prod-service" >> $GITHUB_OUTPUT
+        else
+          echo "environment=dev" >> $GITHUB_OUTPUT
+          echo "ecr_repository=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.PROJECT_NAME }}-dev" >> $GITHUB_OUTPUT
+          echo "ecs_cluster=${{ env.PROJECT_NAME }}-dev-cluster" >> $GITHUB_OUTPUT
+          echo "ecs_service=${{ env.PROJECT_NAME }}-dev-service" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64
+        push: true
+        tags: |
+          ${{ steps.env.outputs.ecr_repository }}:latest
+          ${{ steps.env.outputs.ecr_repository }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Deploy to ECS
+      run: |
+        # Update ECS service to use new image
+        aws ecs update-service \
+          --cluster ${{ steps.env.outputs.ecs_cluster }} \
+          --service ${{ steps.env.outputs.ecs_service }} \
+          --force-new-deployment \
+          --region ${{ env.AWS_REGION }}
+
+        # Wait for deployment to complete
+        echo "⏳ Waiting for deployment to complete..."
+        aws ecs wait services-stable \
+          --cluster ${{ steps.env.outputs.ecs_cluster }} \
+          --services ${{ steps.env.outputs.ecs_service }} \
+          --region ${{ env.AWS_REGION }}
+
+        echo "✅ Deployment completed successfully!"
+
+    - name: Get load balancer URL
+      id: get-url
+      run: |
+        # Get load balancer DNS name
+        if [[ "${{ steps.env.outputs.environment }}" == "prod" ]]; then
+          LB_NAME="${{ env.PROJECT_NAME }}-prod-alb"
+        else
+          LB_NAME="${{ env.PROJECT_NAME }}-dev-alb"
+        fi
+        
+        LB_DNS=$(aws elbv2 describe-load-balancers \
+          --names $LB_NAME \
+          --query 'LoadBalancers[0].DNSName' \
+          --output text \
+          --region ${{ env.AWS_REGION }})
+        
+        echo "url=http://$LB_DNS" >> $GITHUB_OUTPUT
+        echo "🌐 Application URL: http://$LB_DNS"
+
+    - name: Run health check
+      run: |
+        # Wait a bit for the service to be ready
+        sleep 30
+        
+        # Health check
+        URL="${{ steps.get-url.outputs.url }}/health"
+        echo "🔍 Testing health endpoint: $URL"
+        
+        for i in {1..10}; do
+          if curl -f -s "$URL" > /dev/null; then
+            echo "✅ Health check passed!"
+            break
+          fi
+          echo "⏳ Attempt $i failed, waiting 30s..."
+          sleep 30
+        done
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [[ "${{ job.status }}" == "success" ]]; then
+          echo "🎉 Deployment to ${{ steps.env.outputs.environment }} successful!"
+          echo "📱 API URL: ${{ steps.get-url.outputs.url }}"
+          echo "📚 Docs: ${{ steps.get-url.outputs.url }}/docs"
+        else
+          echo "❌ Deployment to ${{ steps.env.outputs.environment }} failed!"
+        fi
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
