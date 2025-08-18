@@ -1,35 +1,55 @@
-"""
-Configuration module for Golf API
-"""
 import os
-from typing import Optional
+from functools import lru_cache
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Application settings"""
+    """Application settings with environment variable support"""
     
-    # API Configuration
-    PROJECT_NAME: str = "Golf Tracker Analytics API"
-    API_V1_STR: str = "/api/v1"
-    DEBUG: bool = False
+    # Database settings
+    database_url: str = "sqlite:///./golf_courses.db"  # Default to SQLite for local development
     
-    # Supabase Configuration
-    SUPABASE_URL: str
-    SUPABASE_ANON_KEY: str
-    SUPABASE_SERVICE_ROLE_KEY: str
-    DATABASE_URL: str
+    # API settings
+    api_title: str = "Golf Course API"
+    api_description: str = "A CRUD API for managing golf course data"
+    api_version: str = "1.0.0"
     
-    # CORS Configuration
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8080"]
+    # Environment
+    environment: str = "development"
+    debug: bool = True
     
-    # Server Configuration
-    HOST: str = "0.0.0.0"
-    PORT: int = 8000
+    # AWS settings (when deployed)
+    aws_region: str = "us-east-1"
     
     class Config:
         env_file = ".env"
-        case_sensitive = True
+        case_sensitive = False
 
 
-settings = Settings()
+@lru_cache()
+def get_settings() -> Settings:
+    """Get cached settings instance"""
+    return Settings()
+
+
+# Database URL construction for different environments
+def get_database_url() -> str:
+    """Get database URL based on environment variables"""
+    settings = get_settings()
+    
+    # If DATABASE_URL is explicitly set, use it
+    if "DATABASE_URL" in os.environ:
+        return os.environ["DATABASE_URL"]
+    
+    # For AWS/production, construct PostgreSQL URL
+    if settings.environment == "production":
+        db_host = os.getenv("DB_HOST", "localhost")
+        db_port = os.getenv("DB_PORT", "5432")
+        db_name = os.getenv("DB_NAME", "golf_courses")
+        db_user = os.getenv("DB_USER", "postgres")
+        db_password = os.getenv("DB_PASSWORD", "")
+        
+        return f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    
+    # Default to SQLite for development
+    return settings.database_url

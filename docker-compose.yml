@@ -1,66 +1,28 @@
 version: '3.8'
 
 services:
-  golf-api:
+  golf-course-api:
     build:
       context: .
       dockerfile: Dockerfile
-      target: production
+    container_name: golf-course-api
     ports:
       - "8000:8000"
     environment:
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - DATABASE_URL=${DATABASE_URL}
-      - PROJECT_NAME=Golf Tracker Analytics API
-      - API_V1_STR=/api/v1
-      - DEBUG=false
-      - HOST=0.0.0.0
-      - PORT=8000
-      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
-    env_file:
-      - .env
+      - PYTHONPATH=/app
+    volumes:
+      # Mount source code for development (optional - remove for production)
+      - ./app:/app/app:ro
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 40s
     networks:
-      - golf-network
-
-  # Optional: Local PostgreSQL for development/testing
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: golf_tracker
-      POSTGRES_USER: golf_user
-      POSTGRES_PASSWORD: golf_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    networks:
-      - golf-network
-    profiles:
-      - local-db
-
-  # Redis for caching (optional)
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    networks:
-      - golf-network
-    profiles:
-      - cache
-
-volumes:
-  postgres_data:
+      - golf-course-network
 
 networks:
-  golf-network:
+  golf-course-network:
     driver: bridge

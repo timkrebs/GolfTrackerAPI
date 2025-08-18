@@ -1,28 +1,24 @@
-# Git
-.git
-.gitignore
-
 # Python
-__pycache__
-*.pyc
-*.pyo
-*.pyd
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
 .Python
-env
-pip-log.txt
-pip-delete-this-directory.txt
-.tox
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git
-.mypy_cache
-.pytest_cache
-.hypothesis
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 # Virtual environments
 venv/
@@ -34,37 +30,27 @@ ENV/
 .idea/
 *.swp
 *.swo
-*~
 
 # OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# Project specific
-.env
-.env.local
-.env.*.local
-*.log
-logs/
-temp/
-tmp/
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
 
 # Documentation
-docs/
 *.md
-!README.md
-
-# Testing
-.pytest_cache/
-htmlcov/
+docs/
 
 # Terraform
 terraform/
-*.tf
-*.tfvars
-.terraform/
+
+# Other
+.env
+*.log

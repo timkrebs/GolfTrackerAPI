@@ -1,0 +1,20 @@
+# Project Configuration
+project_name = "golf-course-api"
+environment  = "dev"
+aws_region   = "us-east-1"
+
+# Network Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# Database Configuration
+db_name     = "golf_courses"
+db_username = "golfadmin"
+db_password = "your-secure-password-here"  # Change this!
+
+# Tags
+tags = {
+  Project     = "Golf Course API"
+  Environment = "Development"
+  Owner       = "Your Name"
+  ManagedBy   = "Terraform"
+}

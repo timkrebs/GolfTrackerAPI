@@ -1,213 +1,242 @@
-# Golf Tracker Analytics API
+# Golf Course API
 
-Eine FastAPI-basierte CRUD API für Golfplatz-Daten mit Supabase-Datenbankanbindung, Docker-Containerisierung und AWS-Deployment.
+A comprehensive FastAPI-based CRUD application for managing golf course data, including detailed hole information, course metadata, and search functionality.
 
-## 🏌️ Features
+## Features
 
-- **Vollständige CRUD-Operationen** für Golf-Entitäten
-- **FastAPI** mit automatischer API-Dokumentation
-- **Supabase** PostgreSQL Datenbankanbindung
-- **Docker** Containerisierung mit Multi-Stage Build
-- **Terraform** Infrastructure as Code für AWS
-- **Async/Await** Support für optimale Performance
-- **Pydantic** Datenvalidierung und Serialisierung
-- **SQLAlchemy** ORM mit async Support
+- **Full CRUD Operations**: Create, Read, Update, Delete golf courses
+- **Detailed Hole Management**: Each course includes comprehensive hole data (par, distance, handicap)
+- **Search Functionality**: Search courses by name, location, or country
+- **Data Validation**: Comprehensive input validation using Pydantic models
+- **API Documentation**: Auto-generated OpenAPI/Swagger documentation
+- **Docker Support**: Fully containerized application
+- **Health Checks**: Built-in health monitoring endpoints
 
-## 🏗️ Architektur
+## API Endpoints
 
-### Datenmodell
-- **Golf Courses**: Golfplatz-Informationen
-- **Golf Rounds**: Gespielten Runden
-- **Hole Scores**: Einzelloch-Ergebnisse
-- **User Profiles**: Spielerprofile
-- **Friendships**: Freundschaftssystem
-- **Group Rounds**: Gruppenrunden
+### Golf Courses
+- `GET /golf-courses` - Get all golf courses (with optional search)
+- `GET /golf-courses/{course_id}` - Get a specific golf course
+- `POST /golf-courses` - Create a new golf course
+- `PUT /golf-courses/{course_id}` - Update an existing golf course
+- `DELETE /golf-courses/{course_id}` - Delete a golf course
 
-### API Endpunkte
-- `GET /api/v1/golf-courses/` - Alle Golfplätze (mit Pagination)
-- `POST /api/v1/golf-courses/` - Neuen Golfplatz erstellen
-- `GET /api/v1/golf-courses/{id}` - Einzelnen Golfplatz abrufen
-- `PUT /api/v1/golf-courses/{id}` - Golfplatz aktualisieren
-- `DELETE /api/v1/golf-courses/{id}` - Golfplatz löschen
-- `GET /api/v1/golf-courses/{id}/stats` - Golfplatz-Statistiken
+### Holes
+- `GET /golf-courses/{course_id}/holes` - Get all holes for a course
+- `GET /golf-courses/{course_id}/holes/{hole_number}` - Get a specific hole
 
-## 🚀 Schnellstart
+### Utility
+- `GET /` - API information
+- `GET /health` - Health check endpoint
+- `GET /docs` - Interactive API documentation (Swagger UI)
+- `GET /redoc` - Alternative API documentation (ReDoc)
 
-### 1. Repository klonen
-```bash
-git clone <repository-url>
-cd GolfTrackerAnalytics
+## Data Model
+
+### Golf Course
+```json
+{
+  "id": "uuid4",
+  "name": "Golf Course Name",
+  "location": "City, State/Region",
+  "country": "Country",
+  "total_holes": 18,
+  "holes": [...]
+}
 ```
 
-### 2. Umgebungsvariablen konfigurieren
-```bash
-cp env.example .env
-# .env mit echten Werten befüllen
+### Hole
+```json
+{
+  "hole_number": 1,
+  "par": 4,
+  "distance_meters": 400,
+  "handicap": 10
+}
 ```
 
-### 3. Mit Docker starten
+## Quick Start
+
+### Using Docker (Recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd GolfTrackerAnalytics
+   ```
+
+2. **Start the application**
+   ```bash
+   docker-compose up -d
+   ```
+
+3. **Access the API**
+   - API: http://localhost:8000
+   - Documentation: http://localhost:8000/docs
+   - Health Check: http://localhost:8000/health
+
+### Local Development
+
+1. **Set up Python virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the application**
+   ```bash
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+   ```
+
+## Docker Commands
+
+### Build and Run
 ```bash
-# API starten
-docker-compose up -d golf-api
+# Build the Docker image
+docker build -t golf-course-api .
 
-# Mit lokaler PostgreSQL (optional)
-docker-compose --profile local-db up -d
+# Run the container
+docker run -p 8000:8000 golf-course-api
 
-# Mit Redis Cache (optional)
-docker-compose --profile cache up -d
+# Or use docker-compose
+docker-compose up -d
 ```
 
-### 4. API-Dokumentation
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-- Health Check: http://localhost:8000/health
-
-## 🔧 Entwicklung
-
-### Lokale Entwicklung
+### Development with Hot Reload
 ```bash
-# Virtuelle Umgebung erstellen
-python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate  # Windows
-
-# Dependencies installieren
-pip install -r requirements.txt
-
-# Umgebungsvariablen setzen
-export SUPABASE_URL="your_url"
-export DATABASE_URL="your_db_url"
-# ... weitere Variablen
-
-# API starten
-python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Run with volume mounting for development
+docker-compose up
 ```
 
-### Testing
+### Stop the Application
 ```bash
-# Tests ausführen
-pytest
-
-# Mit Coverage
-pytest --cov=app
+docker-compose down
 ```
 
-## 🔐 Umgebungsvariablen
+## Example Usage
 
-| Variable | Beschreibung | Beispiel |
-|----------|-------------|----------|
-| `SUPABASE_URL` | Supabase Projekt URL | `https://xxx.supabase.co` |
-| `SUPABASE_ANON_KEY` | Supabase Anonymous Key | `eyJ...` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Service Role Key | `eyJ...` |
-| `DATABASE_URL` | PostgreSQL Connection String | `postgresql+asyncpg://user:pass@host:port/db` |
-| `DEBUG` | Debug Modus | `true` / `false` |
-| `ALLOWED_ORIGINS` | CORS Origins | `http://localhost:3000,http://localhost:8080` |
-
-## 🏗️ Infrastruktur
-
-### Docker Deployment
+### Creating a Golf Course
 ```bash
-# Image bauen
-docker build -t golf-api .
-
-# Container starten
-docker run -p 8000:8000 --env-file .env golf-api
-```
-
-### AWS Deployment (Terraform)
-```bash
-cd terraform/environments/dev
-terraform init
-terraform plan
-terraform apply
-```
-
-## 📊 API Beispiele
-
-### Golf Course erstellen
-```bash
-curl -X POST "http://localhost:8000/api/v1/golf-courses/" \
+curl -X POST "http://localhost:8000/golf-courses" \
   -H "Content-Type: application/json" \
   -d '{
     "name": "Augusta National Golf Club",
-    "city": "Augusta",
-    "country": "USA",
-    "num_holes": 18,
-    "par": 72,
-    "course_rating": 76.2,
-    "slope_rating": 137
+    "location": "Augusta, Georgia",
+    "country": "United States",
+    "total_holes": 18,
+    "holes": [
+      {
+        "hole_number": 1,
+        "par": 4,
+        "distance_meters": 411,
+        "handicap": 10
+      }
+    ]
   }'
 ```
 
-### Golf Courses suchen
+### Getting All Golf Courses
 ```bash
-# Alle Courses
-curl "http://localhost:8000/api/v1/golf-courses/"
-
-# Mit Suche
-curl "http://localhost:8000/api/v1/golf-courses/?search=Augusta&country=USA"
-
-# Mit Pagination
-curl "http://localhost:8000/api/v1/golf-courses/?skip=0&limit=10"
+curl "http://localhost:8000/golf-courses"
 ```
 
-## 🏛️ Projektstruktur
+### Searching Golf Courses
+```bash
+curl "http://localhost:8000/golf-courses?search=Augusta"
+```
 
+### Getting a Specific Course
+```bash
+curl "http://localhost:8000/golf-courses/{course-id}"
+```
+
+## Sample Data
+
+The application comes with two pre-loaded golf courses:
+
+1. **Golf-Club Bad Kissingen e.V. - Thuringia Course** (Germany)
+2. **Augusta National Golf Club** (United States)
+
+Both courses include complete 18-hole data with par, distance, and handicap information.
+
+## API Response Format
+
+All API responses follow a consistent format:
+
+```json
+{
+  "success": true,
+  "message": "Operation completed successfully",
+  "data": { ... },
+  "total": 2  // For list endpoints
+}
+```
+
+## Validation Rules
+
+- **Hole Numbers**: Must be sequential from 1 to total_holes
+- **Par Values**: Must be between 3 and 5
+- **Distance**: Must be greater than 0 meters
+- **Handicap**: Must be between 1 and 18
+- **Total Holes**: Must match the number of holes provided
+
+## Error Handling
+
+The API includes comprehensive error handling with appropriate HTTP status codes:
+
+- `200` - Success
+- `400` - Bad Request (validation errors)
+- `404` - Not Found
+- `500` - Internal Server Error
+
+## Development
+
+### Project Structure
 ```
 GolfTrackerAnalytics/
 ├── app/
-│   ├── __init__.py
-│   ├── main.py                 # FastAPI Anwendung
-│   ├── config.py              # Konfiguration
-│   ├── database.py            # Datenbankverbindung
-│   ├── dependencies.py       # Abhängigkeiten
-│   ├── models/               # SQLAlchemy Models
-│   │   ├── golf_course.py
-│   │   ├── golf_round.py
-│   │   ├── hole_score.py
-│   │   ├── user_profile.py
-│   │   ├── friendship.py
-│   │   └── group_round.py
-│   ├── schemas/              # Pydantic Schemas
-│   │   ├── golf_course.py
-│   │   ├── golf_round.py
-│   │   ├── hole_score.py
-│   │   ├── user_profile.py
-│   │   ├── friendship.py
-│   │   └── group_round.py
-│   └── routers/              # API Router
-│       ├── golf_courses.py
-│       ├── golf_rounds.py
-│       ├── hole_scores.py
-│       ├── user_profiles.py
-│       ├── friendships.py
-│       └── group_rounds.py
-├── terraform/                # Infrastructure as Code
-├── requirements.txt          # Python Dependencies
-├── Dockerfile               # Docker Image
-├── docker-compose.yml       # Docker Compose
-└── README.md
+│   ├── main.py          # FastAPI application and routes
+│   ├── models.py        # Pydantic data models
+│   └── database.py      # In-memory database
+├── requirements.txt     # Python dependencies
+├── Dockerfile          # Docker configuration
+├── docker-compose.yml  # Docker Compose configuration
+└── README.md           # This file
 ```
 
-## 🚦 Status
+### Adding New Features
 
-✅ FastAPI Basis-Setup  
-✅ SQLAlchemy Models  
-✅ Pydantic Schemas  
-✅ Golf Courses CRUD  
-✅ Docker Konfiguration  
-🚧 Weitere Router (Rounds, Users, etc.)  
-🚧 Terraform AWS Infrastruktur  
-🚧 CI/CD Pipeline  
+1. **Models**: Add new Pydantic models in `app/models.py`
+2. **Database**: Extend the database class in `app/database.py`
+3. **Routes**: Add new endpoints in `app/main.py`
 
-## 🤝 Beitragen
+### Running Tests
 
-1. Fork das Repository
-2. Feature Branch erstellen (`git checkout -b feature/neue-funktion`)
-3. Änderungen committen (`git commit -am 'Neue Funktion hinzufügen'`)
-4. Branch pushen (`git push origin feature/neue-funktion`)
-5. Pull Request erstellen
+Currently, the application includes basic validation and error handling. For production use, consider adding:
 
-## 📄 Lizenz
+- Unit tests with pytest
+- Integration tests
+- Load testing
+- Logging configuration
+- Database persistence (PostgreSQL, MongoDB, etc.)
 
-MIT License - siehe LICENSE file für Details.
+## Production Considerations
+
+For production deployment, consider:
+
+1. **Database**: Replace in-memory storage with a persistent database
+2. **Authentication**: Add user authentication and authorization
+3. **Rate Limiting**: Implement API rate limiting
+4. **Monitoring**: Add application monitoring and logging
+5. **HTTPS**: Configure SSL/TLS certificates
+6. **Environment Variables**: Use environment-based configuration
+7. **Scaling**: Consider horizontal scaling with load balancers
+
+## License
+
+This project is open source and available under the MIT License.

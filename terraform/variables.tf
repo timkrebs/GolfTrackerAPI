@@ -1,13 +1,13 @@
-# Global Terraform Variables
 variable "project_name" {
   description = "Name of the project"
   type        = string
-  default     = "golf-api"
+  default     = "golf-course-api"
 }
 
 variable "environment" {
   description = "Environment name (dev, staging, prod)"
   type        = string
+  default     = "dev"
 }
 
 variable "aws_region" {
@@ -22,101 +22,29 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "availability_zones" {
-  description = "List of availability zones"
-  type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
-}
-
-# ECS Configuration
-variable "ecs_cluster_name" {
-  description = "Name of the ECS cluster"
+variable "db_name" {
+  description = "Database name"
   type        = string
-  default     = ""
+  default     = "golf_courses"
 }
 
-variable "ecs_service_name" {
-  description = "Name of the ECS service"
+variable "db_username" {
+  description = "Database master username"
   type        = string
-  default     = ""
+  default     = "golfadmin"
 }
 
-variable "ecs_task_cpu" {
-  description = "CPU units for ECS task"
-  type        = number
-  default     = 256
-}
-
-variable "ecs_task_memory" {
-  description = "Memory for ECS task"
-  type        = number
-  default     = 512
-}
-
-variable "ecs_desired_count" {
-  description = "Desired count of ECS tasks"
-  type        = number
-  default     = 2
-}
-
-# Application Configuration
-variable "container_image" {
-  description = "Docker image for the application"
-  type        = string
-  default     = ""
-}
-
-variable "container_port" {
-  description = "Port the container listens on"
-  type        = number
-  default     = 8000
-}
-
-# Database Configuration (Supabase)
-variable "supabase_url" {
-  description = "Supabase URL"
+variable "db_password" {
+  description = "Database master password"
   type        = string
   sensitive   = true
 }
 
-variable "supabase_anon_key" {
-  description = "Supabase Anonymous Key"
-  type        = string
-  sensitive   = true
-}
-
-variable "supabase_service_role_key" {
-  description = "Supabase Service Role Key"
-  type        = string
-  sensitive   = true
-}
-
-variable "database_url" {
-  description = "Database connection URL"
-  type        = string
-  sensitive   = true
-}
-
-# ALB Configuration
-variable "certificate_arn" {
-  description = "ARN of SSL certificate for ALB"
-  type        = string
-  default     = ""
-}
-
-variable "domain_name" {
-  description = "Domain name for the application"
-  type        = string
-  default     = ""
-}
-
-# Tags
 variable "tags" {
-  description = "Common tags for all resources"
+  description = "A map of tags to add to all resources"
   type        = map(string)
   default = {
-    Project     = "Golf API"
-    Environment = "dev"
-    Terraform   = "true"
+    Project     = "Golf Course API"
+    ManagedBy   = "Terraform"
   }
 }

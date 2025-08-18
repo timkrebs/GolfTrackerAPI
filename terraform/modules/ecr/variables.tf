@@ -1,4 +1,3 @@
-# ECR Module Variables
 variable "project_name" {
   description = "Name of the project"
   type        = string
@@ -10,7 +9,7 @@ variable "environment" {
 }
 
 variable "tags" {
-  description = "Common tags for all resources"
+  description = "A map of tags to add to all resources"
   type        = map(string)
   default     = {}
 }
