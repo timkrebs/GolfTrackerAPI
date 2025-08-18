@@ -1,0 +1,14 @@
+# Development Environment Variables
+aws_region = "us-east-1"
+
+# Container Image (will be updated after ECR push)
+container_image = "your-account-id.dkr.ecr.us-east-1.amazonaws.com/golf-api-dev:latest"
+
+# Supabase Configuration
+supabase_url = "https://your-project.supabase.co"
+supabase_anon_key = "your-anon-key"
+supabase_service_role_key = "your-service-role-key"
+database_url = "postgresql+asyncpg://user:password@host:port/database"
+
+# SSL Certificate (optional for dev)
+certificate_arn = ""

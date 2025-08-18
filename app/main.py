@@ -1,74 +1,57 @@
-from fastapi import FastAPI, HTTPException
+"""
+Main FastAPI application
+"""
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
-import logging
 from app.config import settings
-from app.routes import golf_courses, health
 
-# Logging konfigurieren
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+# Import routers
+from app.routers import golf_courses
+# from app.routers import golf_rounds, user_profiles, friendships, group_rounds, hole_scores
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Application Lifespan Manager"""
-    logger.info("Golf Tracker Analytics API startet...")
-    try:
-        # Hier könnten Startup-Tasks eingefügt werden
-        yield
-    finally:
-        logger.info("Golf Tracker Analytics API wird heruntergefahren...")
-
-
-# FastAPI App erstellen
 app = FastAPI(
-    title="Golf Tracker Analytics API",
-    description="Eine CRUD API für Golfplätze mit Supabase Integration",
+    title=settings.PROJECT_NAME,
+    description="Golf Tracker Analytics API for managing golf courses, rounds, and player statistics",
     version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
-    lifespan=lifespan
+    openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# CORS Middleware hinzufügen
+# Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In Produktion spezifische Origins angeben
+    allow_origins=settings.ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Router registrieren
-app.include_router(health.router)
-app.include_router(golf_courses.router, prefix="/api/v1")
 
-
-@app.get("/", tags=["Root"])
+@app.get("/")
 async def root():
-    """Root Endpoint"""
-    return {
-        "message": "Golf Tracker Analytics API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "health": "/health"
-    }
+    """Root endpoint"""
+    return {"message": "Golf Tracker Analytics API", "version": "1.0.0"}
 
 
-@app.exception_handler(404)
-async def not_found_handler(request, exc):
-    return HTTPException(status_code=404, detail="Endpoint nicht gefunden")
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "service": settings.PROJECT_NAME}
+
+
+# Include routers
+app.include_router(golf_courses.router, prefix=f"{settings.API_V1_STR}/golf-courses", tags=["golf-courses"])
+# app.include_router(golf_rounds.router, prefix=f"{settings.API_V1_STR}/golf-rounds", tags=["golf-rounds"])
+# app.include_router(user_profiles.router, prefix=f"{settings.API_V1_STR}/users", tags=["users"])
+# app.include_router(friendships.router, prefix=f"{settings.API_V1_STR}/friendships", tags=["friendships"])
+# app.include_router(group_rounds.router, prefix=f"{settings.API_V1_STR}/group-rounds", tags=["group-rounds"])
+# app.include_router(hole_scores.router, prefix=f"{settings.API_V1_STR}/hole-scores", tags=["hole-scores"])
 
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
-        "app.main:app",
-        host=settings.api_host,
-        port=settings.api_port,
-        reload=settings.environment == "development"
+        "main:app",
+        host=settings.HOST,
+        port=settings.PORT,
+        reload=settings.DEBUG
     )

@@ -1,59 +1,60 @@
+# Terraform Outputs
 output "vpc_id" {
-  description = "VPC ID"
-  value       = aws_vpc.main.id
+  description = "ID of the VPC"
+  value       = module.vpc.vpc_id
 }
 
-output "public_subnet_ids" {
-  description = "Public Subnet IDs"
-  value       = aws_subnet.public[*].id
+output "vpc_cidr_block" {
+  description = "CIDR block of the VPC"
+  value       = module.vpc.vpc_cidr_block
 }
 
 output "private_subnet_ids" {
-  description = "Private Subnet IDs"
-  value       = aws_subnet.private[*].id
+  description = "IDs of the private subnets"
+  value       = module.vpc.private_subnet_ids
+}
+
+output "public_subnet_ids" {
+  description = "IDs of the public subnets"
+  value       = module.vpc.public_subnet_ids
 }
 
 output "alb_dns_name" {
-  description = "ALB DNS Name"
-  value       = aws_lb.app.dns_name
+  description = "DNS name of the Application Load Balancer"
+  value       = module.alb.alb_dns_name
 }
 
 output "alb_zone_id" {
-  description = "ALB Zone ID"
-  value       = aws_lb.app.zone_id
+  description = "Zone ID of the Application Load Balancer"
+  value       = module.alb.alb_zone_id
 }
 
-output "alb_arn" {
-  description = "ALB ARN"
-  value       = aws_lb.app.arn
+output "ecs_cluster_id" {
+  description = "ID of the ECS cluster"
+  value       = module.ecs.cluster_id
 }
 
 output "ecs_cluster_name" {
-  description = "ECS Cluster Name"
-  value       = aws_ecs_cluster.main.name
+  description = "Name of the ECS cluster"
+  value       = module.ecs.cluster_name
 }
 
 output "ecs_service_name" {
-  description = "ECS Service Name"
-  value       = aws_ecs_service.app.name
+  description = "Name of the ECS service"
+  value       = module.ecs.service_name
+}
+
+output "ecr_repository_url" {
+  description = "URL of the ECR repository"
+  value       = module.ecr.repository_url
+}
+
+output "ecr_repository_name" {
+  description = "Name of the ECR repository"
+  value       = module.ecr.repository_name
 }
 
 output "cloudwatch_log_group_name" {
-  description = "CloudWatch Log Group Name"
-  value       = aws_cloudwatch_log_group.app.name
-}
-
-output "api_url" {
-  description = "API URL"
-  value       = var.certificate_arn != "" ? "https://${aws_lb.app.dns_name}" : "http://${aws_lb.app.dns_name}"
-}
-
-output "api_health_check_url" {
-  description = "API Health Check URL"
-  value       = "${var.certificate_arn != "" ? "https" : "http"}://${aws_lb.app.dns_name}/health"
-}
-
-output "api_docs_url" {
-  description = "API Documentation URL"
-  value       = "${var.certificate_arn != "" ? "https" : "http"}://${aws_lb.app.dns_name}/docs"
+  description = "Name of the CloudWatch log group"
+  value       = module.ecs.log_group_name
 }

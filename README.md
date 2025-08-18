@@ -1,218 +1,213 @@
 # Golf Tracker Analytics API
 
-Eine moderne FastAPI-basierte CRUD-API für Golfplätze mit Supabase-Integration und AWS-Deployment über Terraform.
+Eine FastAPI-basierte CRUD API für Golfplatz-Daten mit Supabase-Datenbankanbindung, Docker-Containerisierung und AWS-Deployment.
 
 ## 🏌️ Features
 
-- **FastAPI**: Moderne, schnelle Web-API mit automatischer OpenAPI-Dokumentation
-- **Supabase Integration**: PostgreSQL-Datenbank mit Echtzeit-Funktionen
-- **Docker**: Containerisierte Anwendung für konsistente Deployments
-- **AWS ECS Fargate**: Serverless Container-Hosting
-- **Terraform**: Infrastructure as Code für AWS
-- **HCP Terraform**: Automatisierte Deployments über Version Control
-- **Auto Scaling**: Automatische Skalierung basierend auf CPU/Memory
-- **Monitoring**: CloudWatch Logs und Container Insights
+- **Vollständige CRUD-Operationen** für Golf-Entitäten
+- **FastAPI** mit automatischer API-Dokumentation
+- **Supabase** PostgreSQL Datenbankanbindung
+- **Docker** Containerisierung mit Multi-Stage Build
+- **Terraform** Infrastructure as Code für AWS
+- **Async/Await** Support für optimale Performance
+- **Pydantic** Datenvalidierung und Serialisierung
+- **SQLAlchemy** ORM mit async Support
 
-## 🚀 API Endpoints
+## 🏗️ Architektur
 
-### Golf Courses
+### Datenmodell
+- **Golf Courses**: Golfplatz-Informationen
+- **Golf Rounds**: Gespielten Runden
+- **Hole Scores**: Einzelloch-Ergebnisse
+- **User Profiles**: Spielerprofile
+- **Friendships**: Freundschaftssystem
+- **Group Rounds**: Gruppenrunden
+
+### API Endpunkte
+- `GET /api/v1/golf-courses/` - Alle Golfplätze (mit Pagination)
 - `POST /api/v1/golf-courses/` - Neuen Golfplatz erstellen
-- `GET /api/v1/golf-courses/` - Alle Golfplätze abrufen (mit Pagination und Filtern)
-- `GET /api/v1/golf-courses/{id}` - Spezifischen Golfplatz abrufen
+- `GET /api/v1/golf-courses/{id}` - Einzelnen Golfplatz abrufen
 - `PUT /api/v1/golf-courses/{id}` - Golfplatz aktualisieren
 - `DELETE /api/v1/golf-courses/{id}` - Golfplatz löschen
-- `GET /api/v1/golf-courses/search/` - Golfplätze durchsuchen
+- `GET /api/v1/golf-courses/{id}/stats` - Golfplatz-Statistiken
 
-### Health & Documentation
-- `GET /health` - Health Check
-- `GET /docs` - Swagger UI Dokumentation
-- `GET /redoc` - ReDoc Dokumentation
+## 🚀 Schnellstart
 
-## 🛠️ Setup
-
-### 1. Lokale Entwicklung
-
+### 1. Repository klonen
 ```bash
-# Repository klonen
 git clone <repository-url>
 cd GolfTrackerAnalytics
+```
 
-# Environment-Datei erstellen
+### 2. Umgebungsvariablen konfigurieren
+```bash
 cp env.example .env
-# .env mit Ihren Supabase-Credentials ausfüllen
+# .env mit echten Werten befüllen
+```
+
+### 3. Mit Docker starten
+```bash
+# API starten
+docker-compose up -d golf-api
+
+# Mit lokaler PostgreSQL (optional)
+docker-compose --profile local-db up -d
+
+# Mit Redis Cache (optional)
+docker-compose --profile cache up -d
+```
+
+### 4. API-Dokumentation
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- Health Check: http://localhost:8000/health
+
+## 🔧 Entwicklung
+
+### Lokale Entwicklung
+```bash
+# Virtuelle Umgebung erstellen
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# venv\Scripts\activate  # Windows
 
 # Dependencies installieren
 pip install -r requirements.txt
 
-# Datenbank-Schema in Supabase ausführen
-# database/schema.sql in Supabase SQL Editor ausführen
+# Umgebungsvariablen setzen
+export SUPABASE_URL="your_url"
+export DATABASE_URL="your_db_url"
+# ... weitere Variablen
 
-# API lokal starten
-python -m uvicorn app.main:app --reload
+# API starten
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 2. Docker
-
+### Testing
 ```bash
-# Mit docker-compose
-docker-compose up --build
+# Tests ausführen
+pytest
 
-# Oder mit Docker direkt
-docker build -t golf-tracker-api .
-docker run -p 8000:8000 --env-file .env golf-tracker-api
+# Mit Coverage
+pytest --cov=app
 ```
 
-### 3. AWS Deployment
+## 🔐 Umgebungsvariablen
 
-#### Voraussetzungen:
-- AWS Account mit entsprechenden Berechtigungen
-- HCP Terraform Account
-- ECR Repository für Container Images
-- Supabase Account und Datenbank
+| Variable | Beschreibung | Beispiel |
+|----------|-------------|----------|
+| `SUPABASE_URL` | Supabase Projekt URL | `https://xxx.supabase.co` |
+| `SUPABASE_ANON_KEY` | Supabase Anonymous Key | `eyJ...` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Service Role Key | `eyJ...` |
+| `DATABASE_URL` | PostgreSQL Connection String | `postgresql+asyncpg://user:pass@host:port/db` |
+| `DEBUG` | Debug Modus | `true` / `false` |
+| `ALLOWED_ORIGINS` | CORS Origins | `http://localhost:3000,http://localhost:8080` |
 
-#### Schritte:
+## 🏗️ Infrastruktur
 
-1. **ECR Repository erstellen**:
+### Docker Deployment
 ```bash
-aws ecr create-repository --repository-name golf-tracker --region eu-central-1
+# Image bauen
+docker build -t golf-api .
+
+# Container starten
+docker run -p 8000:8000 --env-file .env golf-api
 ```
 
-2. **Image zu ECR pushen**:
+### AWS Deployment (Terraform)
 ```bash
-# Login zu ECR
-aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin <account-id>.dkr.ecr.eu-central-1.amazonaws.com
-
-# Image bauen und pushen
-docker build -t golf-tracker .
-docker tag golf-tracker:latest <account-id>.dkr.ecr.eu-central-1.amazonaws.com/golf-tracker:latest
-docker push <account-id>.dkr.ecr.eu-central-1.amazonaws.com/golf-tracker:latest
+cd terraform/environments/dev
+terraform init
+terraform plan
+terraform apply
 ```
 
-3. **HCP Terraform Workspace konfigurieren**:
-   - Neuen Workspace in HCP Terraform erstellen
-   - VCS-Integration mit GitHub einrichten
-   - Environment Variables setzen:
-     - `TF_VAR_container_image`: ECR Image URI
-     - `TF_VAR_supabase_url`: Supabase URL
-     - `TF_VAR_supabase_key`: Supabase Anon Key
-     - `TF_VAR_database_url`: Database Connection String
+## 📊 API Beispiele
 
-4. **GitHub Secrets konfigurieren**:
-   - `AWS_ACCESS_KEY_ID`
-   - `AWS_SECRET_ACCESS_KEY`
-   - `TF_API_TOKEN`
-   - `SUPABASE_URL`
-   - `SUPABASE_KEY`
-   - `DATABASE_URL`
-
-5. **Deployment**:
-   - Push zu `main` Branch triggert automatisches Deployment
-   - GitHub Actions baut Image und deployed via Terraform
-
-## 📊 Datenmodell
-
-### Golf Course
-```json
-{
-  "id": 1,
-  "name": "Münchener Golf Club",
-  "description": "Einer der ältesten und prestigeträchtigsten Golfclubs...",
-  "address": "Golfplatzstraße 1",
-  "city": "München",
-  "country": "Deutschland",
-  "postal_code": "80539",
-  "phone": "+49 89 123456",
-  "email": "info@mgc.de",
-  "website": "https://www.mgc.de",
-  "holes": 18,
-  "par": 72,
-  "yardage": 6200,
-  "difficulty": "championship",
-  "green_fee": 95.00,
-  "latitude": 48.1351,
-  "longitude": 11.5820,
-  "is_active": true,
-  "created_at": "2024-01-01T12:00:00Z",
-  "updated_at": "2024-01-01T12:00:00Z"
-}
-```
-
-## 🔧 Konfiguration
-
-### Environment Variables
-- `SUPABASE_URL`: Supabase Projekt URL
-- `SUPABASE_KEY`: Supabase Anon/Service Key
-- `DATABASE_URL`: PostgreSQL Connection String
-- `ENVIRONMENT`: dev/staging/prod
-- `API_HOST`: Host für die API (default: 0.0.0.0)
-- `API_PORT`: Port für die API (default: 8000)
-
-### Terraform Variables
-Siehe `terraform/terraform.auto.tfvars.example` für alle verfügbaren Konfigurationsoptionen.
-
-## 🏗️ Architektur
-
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   GitHub        │    │   HCP Terraform  │    │      AWS        │
-│   Repository    │───▶│   Workspace      │───▶│   ECS Fargate   │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                                         │
-┌─────────────────┐    ┌──────────────────┐             │
-│   Supabase      │◀───│   FastAPI App    │◀────────────┘
-│   Database      │    │   (Container)    │
-└─────────────────┘    └──────────────────┘
-```
-
-### AWS Infrastruktur:
-- **VPC**: Isoliertes Netzwerk mit Public/Private Subnets
-- **ECS Fargate**: Serverless Container-Hosting
-- **Application Load Balancer**: HTTPS-Terminierung und Load Balancing
-- **Auto Scaling**: CPU/Memory-basierte Skalierung
-- **CloudWatch**: Logs und Monitoring
-- **Systems Manager**: Secure Parameter Store für Secrets
-
-## 🔍 Monitoring
-
-- **Health Check**: `/health` Endpoint für Liveness/Readiness Probes
-- **CloudWatch Logs**: Zentrale Log-Aggregation
-- **Container Insights**: Detaillierte Container-Metriken
-- **ALB Access Logs**: HTTP-Request-Logging
-
-## 🚦 CI/CD Pipeline
-
-1. **Test**: Unit Tests ausführen
-2. **Build**: Docker Image bauen
-3. **Push**: Image zu ECR pushen
-4. **Deploy**: Terraform Apply via HCP Terraform
-
-## 📝 Development
-
-### Code-Struktur:
-```
-app/
-├── __init__.py
-├── main.py              # FastAPI App
-├── config.py            # Konfiguration
-├── models.py            # Pydantic Models
-├── database.py          # Supabase Client
-├── crud.py              # Database Operations
-└── routes/
-    ├── __init__.py
-    ├── golf_courses.py  # Golf Course Endpoints
-    └── health.py        # Health Check
-```
-
-### Lokale Tests:
+### Golf Course erstellen
 ```bash
-# Tests ausführen (wenn implementiert)
-python -m pytest tests/ -v
-
-# API lokal testen
-curl http://localhost:8000/health
-curl http://localhost:8000/docs
+curl -X POST "http://localhost:8000/api/v1/golf-courses/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Augusta National Golf Club",
+    "city": "Augusta",
+    "country": "USA",
+    "num_holes": 18,
+    "par": 72,
+    "course_rating": 76.2,
+    "slope_rating": 137
+  }'
 ```
+
+### Golf Courses suchen
+```bash
+# Alle Courses
+curl "http://localhost:8000/api/v1/golf-courses/"
+
+# Mit Suche
+curl "http://localhost:8000/api/v1/golf-courses/?search=Augusta&country=USA"
+
+# Mit Pagination
+curl "http://localhost:8000/api/v1/golf-courses/?skip=0&limit=10"
+```
+
+## 🏛️ Projektstruktur
+
+```
+GolfTrackerAnalytics/
+├── app/
+│   ├── __init__.py
+│   ├── main.py                 # FastAPI Anwendung
+│   ├── config.py              # Konfiguration
+│   ├── database.py            # Datenbankverbindung
+│   ├── dependencies.py       # Abhängigkeiten
+│   ├── models/               # SQLAlchemy Models
+│   │   ├── golf_course.py
+│   │   ├── golf_round.py
+│   │   ├── hole_score.py
+│   │   ├── user_profile.py
+│   │   ├── friendship.py
+│   │   └── group_round.py
+│   ├── schemas/              # Pydantic Schemas
+│   │   ├── golf_course.py
+│   │   ├── golf_round.py
+│   │   ├── hole_score.py
+│   │   ├── user_profile.py
+│   │   ├── friendship.py
+│   │   └── group_round.py
+│   └── routers/              # API Router
+│       ├── golf_courses.py
+│       ├── golf_rounds.py
+│       ├── hole_scores.py
+│       ├── user_profiles.py
+│       ├── friendships.py
+│       └── group_rounds.py
+├── terraform/                # Infrastructure as Code
+├── requirements.txt          # Python Dependencies
+├── Dockerfile               # Docker Image
+├── docker-compose.yml       # Docker Compose
+└── README.md
+```
+
+## 🚦 Status
+
+✅ FastAPI Basis-Setup  
+✅ SQLAlchemy Models  
+✅ Pydantic Schemas  
+✅ Golf Courses CRUD  
+✅ Docker Konfiguration  
+🚧 Weitere Router (Rounds, Users, etc.)  
+🚧 Terraform AWS Infrastruktur  
+🚧 CI/CD Pipeline  
+
+## 🤝 Beitragen
+
+1. Fork das Repository
+2. Feature Branch erstellen (`git checkout -b feature/neue-funktion`)
+3. Änderungen committen (`git commit -am 'Neue Funktion hinzufügen'`)
+4. Branch pushen (`git push origin feature/neue-funktion`)
+5. Pull Request erstellen
 
 ## 📄 Lizenz
 
-Dieses Projekt ist unter der MIT-Lizenz lizenziert.
+MIT License - siehe LICENSE file für Details.

@@ -1,114 +1,122 @@
-variable "aws_region" {
-  description = "AWS Region für die Infrastruktur"
+# Global Terraform Variables
+variable "project_name" {
+  description = "Name of the project"
   type        = string
-  default     = "eu-central-1"
+  default     = "golf-api"
 }
 
 variable "environment" {
-  description = "Environment (dev, staging, prod)"
+  description = "Environment name (dev, staging, prod)"
   type        = string
-  default     = "dev"
-
-  validation {
-    condition     = contains(["dev", "staging", "prod"], var.environment)
-    error_message = "Environment muss dev, staging oder prod sein."
-  }
 }
 
-variable "project_name" {
-  description = "Projektname"
+variable "aws_region" {
+  description = "AWS region"
   type        = string
-  default     = "golf-tracker"
+  default     = "us-east-1"
 }
 
-variable "container_image" {
-  description = "Docker Container Image URI"
+variable "vpc_cidr" {
+  description = "CIDR block for VPC"
   type        = string
-  default     = "" # Will be set by CI/CD or HCP Terraform variables
-
-  validation {
-    condition     = length(var.container_image) > 0
-    error_message = "Container image URI ist erforderlich. Setzen Sie diese Variable in HCP Terraform oder via -var."
-  }
+  default     = "10.0.0.0/16"
 }
 
-variable "container_port" {
-  description = "Port auf dem der Container läuft"
-  type        = number
-  default     = 8000
+variable "availability_zones" {
+  description = "List of availability zones"
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b"]
 }
 
-variable "desired_capacity" {
-  description = "Gewünschte Anzahl von ECS Tasks"
-  type        = number
-  default     = 2
+# ECS Configuration
+variable "ecs_cluster_name" {
+  description = "Name of the ECS cluster"
+  type        = string
+  default     = ""
 }
 
-variable "min_capacity" {
-  description = "Minimale Anzahl von ECS Tasks"
-  type        = number
-  default     = 1
+variable "ecs_service_name" {
+  description = "Name of the ECS service"
+  type        = string
+  default     = ""
 }
 
-variable "max_capacity" {
-  description = "Maximale Anzahl von ECS Tasks"
-  type        = number
-  default     = 10
-}
-
-variable "cpu" {
-  description = "CPU Units für ECS Task"
+variable "ecs_task_cpu" {
+  description = "CPU units for ECS task"
   type        = number
   default     = 256
 }
 
-variable "memory" {
-  description = "Memory (MB) für ECS Task"
+variable "ecs_task_memory" {
+  description = "Memory for ECS task"
   type        = number
   default     = 512
 }
 
+variable "ecs_desired_count" {
+  description = "Desired count of ECS tasks"
+  type        = number
+  default     = 2
+}
+
+# Application Configuration
+variable "container_image" {
+  description = "Docker image for the application"
+  type        = string
+  default     = ""
+}
+
+variable "container_port" {
+  description = "Port the container listens on"
+  type        = number
+  default     = 8000
+}
+
+# Database Configuration (Supabase)
 variable "supabase_url" {
   description = "Supabase URL"
   type        = string
   sensitive   = true
-  default     = "" # Set this in HCP Terraform variables
 }
 
-variable "supabase_key" {
-  description = "Supabase API Key"
+variable "supabase_anon_key" {
+  description = "Supabase Anonymous Key"
   type        = string
   sensitive   = true
-  default     = "" # Set this in HCP Terraform variables
+}
+
+variable "supabase_service_role_key" {
+  description = "Supabase Service Role Key"
+  type        = string
+  sensitive   = true
 }
 
 variable "database_url" {
-  description = "Database URL"
+  description = "Database connection URL"
   type        = string
   sensitive   = true
-  default     = "" # Set this in HCP Terraform variables
+}
+
+# ALB Configuration
+variable "certificate_arn" {
+  description = "ARN of SSL certificate for ALB"
+  type        = string
+  default     = ""
 }
 
 variable "domain_name" {
-  description = "Domain Name für die API (optional)"
+  description = "Domain name for the application"
   type        = string
   default     = ""
 }
 
-variable "certificate_arn" {
-  description = "ACM Certificate ARN für HTTPS (optional)"
-  type        = string
-  default     = ""
-}
-
-variable "enable_container_insights" {
-  description = "Enable CloudWatch Container Insights"
-  type        = bool
-  default     = true
-}
-
-variable "log_retention_days" {
-  description = "CloudWatch Logs Retention in Tagen"
-  type        = number
-  default     = 30
+# Tags
+variable "tags" {
+  description = "Common tags for all resources"
+  type        = map(string)
+  default = {
+    Project     = "Golf API"
+    Environment = "dev"
+    Terraform   = "true"
+  }
 }
