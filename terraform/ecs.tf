@@ -116,14 +116,9 @@ resource "aws_ecs_service" "app" {
     container_port   = var.container_port
   }
 
-  deployment_configuration {
-    maximum_percent         = 200
-    minimum_healthy_percent = 100
-
-    deployment_circuit_breaker {
-      enable   = true
-      rollback = true
-    }
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
   }
 
   # Auto Scaling Integration
